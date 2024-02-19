@@ -23,5 +23,5 @@
 * write Android app UI code
 * test the function
 
-### daily/week meeting?
+### daily/weekly meeting?
 
