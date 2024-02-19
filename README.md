@@ -1,3 +1,10 @@
+# How to clone this project?
+* Android studio -> file -> new -> project from version control
+* copy and paste the URL link of this repository
+* select the file path that you want to store the project
+* click clone
+
+
 ## functions of the android app
 
 1. receive video stream from raspberry pi
@@ -8,11 +15,11 @@
 
 4. read voice message from the data base
 
+
 ## function of data base
 
 1. store information of different family members
 2. store voice information from the visitor
-
 
 
 ### my tasks
