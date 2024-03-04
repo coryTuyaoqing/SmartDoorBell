@@ -17,9 +17,16 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Screen1"
-            android:textSize="20dp"
+            android:textSize="30dp"
             android:textColor="@color/white"
             android:id="@+id/title"/>
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:text="Profile"
+            android:id="@+id/btnProfile"/>
 
     </RelativeLayout>
 
