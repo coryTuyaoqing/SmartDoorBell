@@ -46,10 +46,10 @@
             android:id="@+id/status"/>
 
         <ImageView
+            android:id="@+id/cameraPhoto"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/cameraPhoto"
-            android:src="@drawable/camera_photo"/>
+            android:src="@drawable/camera_photo" />
 
     </RelativeLayout>
 
