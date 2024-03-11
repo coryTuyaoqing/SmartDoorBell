@@ -32,3 +32,8 @@
 
 ### daily/weekly meeting?
 
+
+
+### GUI Preview
+![GUI_priview](GUI_updated.png)
+

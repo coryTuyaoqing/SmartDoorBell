@@ -1,14 +1,14 @@
 package com.example.smartdoorbell;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.IOException;
 
@@ -20,7 +20,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class Profile extends AppCompatActivity {
+public class ProfileActivity extends AppCompatActivity {
     OkHttpClient client;
     private TextView txtFirstName, txtSecondName, txtEmail, registrationStatus;
     Button btnRegister;
@@ -33,7 +33,7 @@ public class Profile extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
         client = new OkHttpClient();
-        initView();
+//        initView();
 
         btnRegister.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -63,7 +63,7 @@ public class Profile extends AppCompatActivity {
                             .post(requestBody)
                             .build();
 
-                    Intent intent = new Intent(Profile.this, MainActivity.class);
+                    Intent intent = new Intent(ProfileActivity.this, MainActivity.class);
                     startActivity(intent);
 
                     client.newCall(request).enqueue(new Callback() {

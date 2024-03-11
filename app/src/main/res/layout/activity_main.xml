@@ -8,111 +8,132 @@
     tools:context=".MainActivity">
 
     <RelativeLayout
+        android:id="@+id/firstRL"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/firstRL"
-        android:background="@color/black">
+        android:background="@color/purple"
+        android:padding="10dp">
 
         <TextView
+            android:id="@+id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Screen1"
-            android:textSize="30dp"
-            android:textColor="@color/white"
-            android:id="@+id/title"/>
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="10dp"
+            android:text="SmartDoorBell"
+            android:textSize="30sp"
+            android:textStyle="bold"/>
 
         <Button
+            android:id="@+id/btnProfile"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:text="Profile"
-            android:id="@+id/btnProfile"/>
+            android:layout_marginTop="10dp"
+            android:layout_marginRight="10dp"
+            android:text="Profile" />
 
     </RelativeLayout>
 
     <RelativeLayout
+        android:id="@+id/secondRL"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/secondRL"
-        android:layout_marginTop="20dp"
-        android:layout_below="@+id/firstRL">
+        android:layout_below="@+id/firstRL"
+        android:layout_marginTop="80dp">
 
         <TextView
+            android:id="@+id/txtStatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="some one is at the door!"
-            android:textSize="20dp"
             android:layout_centerHorizontal="true"
-            android:id="@+id/status"/>
+            android:layout_marginTop="40dp"
+            android:text="some one is at the door!"
+            android:textSize="30dp" />
 
         <ImageView
             android:id="@+id/cameraPhoto"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/camera_photo" />
+            android:layout_below="@+id/txtStatus"
+            android:padding="20dp"
+            android:src="@mipmap/camera_photo" />
 
     </RelativeLayout>
 
     <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:id="@+id/thirdRL"
-        android:layout_below="@+id/secondRL">
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Open door"
-            android:id="@+id/btnOpenDoor"
-            android:textSize="25dp"
-            android:layout_marginLeft="20dp"/>
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/secondRL"
+        android:layout_marginTop="80dp">
 
         <TextView
+            android:id="@+id/txtTheDoorIsCurrently"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="20dp"
-            android:layout_toRightOf="@+id/btnOpenDoor"
+            android:layout_marginTop="40dp"
             android:text="The door is currently:"
-            android:textSize="20dp"
-            android:id="@+id/txtTheDoorIsCurrently"/>
+            android:textSize="25sp" />
 
         <TextView
+            android:id="@+id/txtDoorStatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/txtDoorStatus"
-            android:layout_below="@+id/txtTheDoorIsCurrently"
-            android:layout_toRightOf="@+id/btnOpenDoor"
             android:layout_marginLeft="20dp"
+            android:layout_marginTop="40dp"
+            android:layout_toRightOf="@+id/txtTheDoorIsCurrently"
             android:text="CLOSED"
-            android:textSize="20dp"
-            android:textColor="@color/white"
-            android:background="@color/black"/>
+            android:textSize="25sp"
+            android:textStyle="bold" />
+
+        <ImageButton
+            android:id="@+id/imgBtnLock"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/txtTheDoorIsCurrently"
+            android:layout_marginLeft="25dp"
+            android:layout_marginTop="40dp"
+            android:contentDescription="bottom to (un)lock the door"
+            android:padding="30dp"
+            android:src="@drawable/ic_lock"
+            tools:ignore="TouchTargetSizeCheck" />
+
+        <ImageButton
+            android:id="@+id/imgBtnSpeak"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/txtTheDoorIsCurrently"
+            android:layout_marginLeft="40dp"
+            android:layout_marginTop="40dp"
+            android:layout_toRightOf="@+id/imgBtnLock"
+            android:contentDescription="bottom to turn the speaker on"
+            android:padding="30dp"
+            android:src="@drawable/ic_deafen" />
+
+        <ImageButton
+            android:id="@+id/imgBtnTakePhoto"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/txtTheDoorIsCurrently"
+            android:layout_marginLeft="40dp"
+            android:layout_marginTop="40dp"
+            android:layout_toRightOf="@+id/imgBtnSpeak"
+            android:contentDescription="bottom to turn the speaker on"
+            android:padding="30dp"
+            android:src="@drawable/ic_camera" />
+
 
     </RelativeLayout>
 
     <RelativeLayout
+        android:id="@+id/fourthRL"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/fourthRL"
         android:layout_below="@+id/thirdRL"
         android:layout_marginTop="10dp">
 
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Deafen"
-            android:id="@+id/btnDeafen"
-            android:textSize="25dp"
-            android:layout_marginLeft="20dp"/>
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Press to speak"
-            android:id="@+id/btnPressToSpeak"
-            android:textSize="25dp"
-            android:layout_toRightOf="@+id/btnDeafen"
-            android:layout_marginLeft="20dp"/>
 
     </RelativeLayout>
 

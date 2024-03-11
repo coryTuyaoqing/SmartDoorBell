@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">SmartDoorBell</string>
+    <string name="firstName">firstName</string>
+    <string name="open">
+        open
+        sdfsdfsdfr
+    </string>
 </resources>
