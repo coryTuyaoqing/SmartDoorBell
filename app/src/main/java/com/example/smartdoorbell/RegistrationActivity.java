@@ -20,10 +20,10 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class ProfileActivity extends AppCompatActivity {
+public class RegistrationActivity extends AppCompatActivity {
     OkHttpClient client;
     private TextView txtFirstName, txtSecondName, txtEmail, registrationStatus;
-    Button btnRegister;
+    Button btnRegister, btnLogin;
     EditText edtTxtFirstName, edtTxtSecondName, edtTxtEmail, edtPassWord, edtPassWordAgain;
 
     String postURL = "https://studev.groept.be/api/a23ib2a04/Registration_POST";
@@ -31,9 +31,9 @@ public class ProfileActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_profile);
+        setContentView(R.layout.activity_registration);
         client = new OkHttpClient();
-//        initView();
+        initView();
 
         btnRegister.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -63,7 +63,7 @@ public class ProfileActivity extends AppCompatActivity {
                             .post(requestBody)
                             .build();
 
-                    Intent intent = new Intent(ProfileActivity.this, MainActivity.class);
+                    Intent intent = new Intent(RegistrationActivity.this, MainActivity.class);
                     startActivity(intent);
 
                     client.newCall(request).enqueue(new Callback() {
@@ -74,10 +74,9 @@ public class ProfileActivity extends AppCompatActivity {
                         }
 
                         @Override
-                        public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                        public void onResponse(@NonNull Call call, @NonNull Response response) {
                             if (!response.isSuccessful()) {
-                                // Handle unsuccessful response
-                                // You may want to show an error message to the user
+                                System.out.println("Unsuccessful");
                             }
                         }
                     });
@@ -88,6 +87,15 @@ public class ProfileActivity extends AppCompatActivity {
                 }
             }
         });
+
+        btnLogin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(RegistrationActivity.this, LoginActivity.class);
+                startActivity(intent);
+            }
+        });
+
     }
 
     private void initView() {
@@ -95,6 +103,7 @@ public class ProfileActivity extends AppCompatActivity {
         txtSecondName = findViewById(R.id.txtSecondName);
         txtEmail = findViewById(R.id.txtEmail);
         btnRegister = findViewById(R.id.btnRegist);
+        btnLogin = findViewById(R.id.btnLogin);
         edtTxtFirstName = findViewById(R.id.edtTxtFirstName);
         edtTxtSecondName = findViewById(R.id.edtTxtSecondName);
         edtTxtEmail = findViewById(R.id.edtTxtEmail);
