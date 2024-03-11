@@ -24,6 +24,17 @@ public class MainActivity extends AppCompatActivity {
 
         intiView();
 
+        UserID userID = new UserID(getApplicationContext());
+        Intent intent;
+        if(userID.initID()){
+            intent = new Intent(MainActivity.this, RegistrationActivity.class);
+        }
+        else{
+            intent = new Intent(MainActivity.this, LoginActivity.class);
+        }
+
+        startActivity(intent);
+
 
         btnProfile.setOnClickListener(new View.OnClickListener() {
             @Override

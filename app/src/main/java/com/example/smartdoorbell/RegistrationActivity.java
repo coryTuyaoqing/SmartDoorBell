@@ -1,5 +1,6 @@
 package com.example.smartdoorbell;
 
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -80,6 +81,8 @@ public class RegistrationActivity extends AppCompatActivity {
                             }
                         }
                     });
+
+
                 } else {
                     if (!passwordagain.equals(password)) {
                         registrationStatus.setText(errorMsg);
