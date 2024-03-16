@@ -23,24 +23,19 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         intiView();
-
-        UserID userID = new UserID(getApplicationContext());
-        Intent intent;
-        if(userID.initID()){
-            intent = new Intent(MainActivity.this, RegistrationActivity.class);
-        }
-        else{
-            intent = new Intent(MainActivity.this, LoginActivity.class);
-        }
-
-        startActivity(intent);
-
-
         btnProfile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
-                startActivity(intent);
+                Intent intent;
+                UserInfo userInfo = new UserInfo(getApplicationContext());
+                if(userInfo.initInfo()){
+                    intent  = new Intent(MainActivity.this, RegistrationActivity.class);
+                    startActivity(intent);
+                }
+                else{
+                    intent = new Intent(MainActivity.this, ProfileActivity.class);
+                    startActivity(intent);
+                }
             }
         });
 

@@ -10,7 +10,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Scanner;
 
-public class UserID {
+public class UserInfo {
 
     /*
     this class contain several methods to write, read or initialize user ID.
@@ -19,13 +19,13 @@ public class UserID {
     private Context context;
     private File file;
 
-    public UserID(Context context){
+    public UserInfo(Context context){
         this.context = context;
         this.file = new File(context.getFilesDir(), "ID");
     }
 
 
-    public boolean initID(){
+    public boolean initInfo(){
         if(!file.exists()){
             System.out.println("file doesn't exist");
             try{
@@ -41,7 +41,7 @@ public class UserID {
 
     }
 
-    public boolean writeID(int ID){
+    public boolean writeInfo(String firstName, String lastName, String email){
         if(!file.exists()){
             return false;
         }
@@ -52,7 +52,9 @@ public class UserID {
 
                 try {
                     FileWriter writer = new FileWriter(fos.getFD());
-                    writer.write(String.valueOf(ID));
+                    writer.write(firstName + '\n');
+                    writer.write(lastName  + '\n');
+                    writer.write(email  + '\n');
                     writer.close();
                     return true;
                 } catch (IOException e) {
@@ -64,19 +66,35 @@ public class UserID {
         }
     }
 
-    public int readID(){
-        int ID = -1;
+    String[] readFile(){
+        String[] userInfo = new String[3];
         FileInputStream fis;
         try {
             fis = new FileInputStream(file);
 
             Scanner scanner = new Scanner(fis);
             if(scanner.hasNext()){
-                ID = scanner.nextInt();
+                userInfo[0] = scanner.next();
+                userInfo[1] = scanner.next();
+                userInfo[2] = scanner.next();
             }
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
-        return ID;
+        return userInfo;
     }
+
+    public String readFirstName(){
+        return readFile()[1];
+    }
+
+
+    public String readLastName(){
+        return readFile()[2];
+    }
+
+    public String readEmail(){
+        return readFile()[3];
+    }
+
 }

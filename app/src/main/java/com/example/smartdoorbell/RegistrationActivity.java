@@ -64,7 +64,7 @@ public class RegistrationActivity extends AppCompatActivity {
                             .post(requestBody)
                             .build();
 
-                    Intent intent = new Intent(RegistrationActivity.this, MainActivity.class);
+                    Intent intent = new Intent(RegistrationActivity.this, LoginActivity.class);
                     startActivity(intent);
 
                     client.newCall(request).enqueue(new Callback() {
@@ -81,7 +81,6 @@ public class RegistrationActivity extends AppCompatActivity {
                             }
                         }
                     });
-
 
                 } else {
                     if (!passwordagain.equals(password)) {

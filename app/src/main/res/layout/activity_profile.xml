@@ -33,28 +33,10 @@
     </RelativeLayout>
 
     <RelativeLayout
-        android:id="@+id/profileAvatarRL"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/profileTitleRL"
-        android:layout_marginTop="40dp"
-        android:padding="20dp">
-
-        <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:src="@drawable/ic_camera"
-            android:padding="30dp"/>
-
-
-    </RelativeLayout>
-
-    <RelativeLayout
         android:id="@+id/profileBodyRL"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/profileAvatarRL"
+        android:layout_below="@+id/profileTitleRL"
         android:layout_marginTop="40dp">
 
         <TextView
@@ -76,7 +58,7 @@
             android:textSize="30dp" />
 
         <TextView
-            android:id="@+id/txtProfileEmailName"
+            android:id="@+id/txtProfileEmail"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/txtProfileLastName"
@@ -84,6 +66,15 @@
             android:layout_marginTop="40dp"
             android:text="email"
             android:textSize="30dp" />
+
+        <Button
+            android:id="@+id/btnProfileLogout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/txtProfileEmail"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="40dp"
+            android:text="Logout" />
 
 
     </RelativeLayout>
