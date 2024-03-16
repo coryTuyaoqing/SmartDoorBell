@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -26,9 +26,8 @@ import okhttp3.Response;
 
 public class LoginActivity extends AppCompatActivity {
     OkHttpClient client;
-    private TextView loginStatus;
     EditText edtEmail, edtPassword;
-    Button btnLogin2;
+    Button btnLogin2, btnSignUp;
     String getURL = "https://studev.groept.be/api/a23ib2a04/Login";
     String errorMsg2 = "Login unsuccessful";
     String errorMsg3 = "Fill in all fields";
@@ -41,6 +40,7 @@ public class LoginActivity extends AppCompatActivity {
         edtEmail = findViewById(R.id.edtEmail);
         edtPassword = findViewById(R.id.edtPassword);
         btnLogin2 = findViewById(R.id.btnLogin2);
+        btnSignUp = findViewById(R.id.btnSignUp);
 
         btnLogin2.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -84,7 +84,7 @@ public class LoginActivity extends AppCompatActivity {
                                     Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                                     startActivity(intent);
                                 } else {
-                                    loginStatus.setText(errorMsg2);
+                                    Toast.makeText(LoginActivity.this, errorMsg2, Toast.LENGTH_LONG).show();
                                 }
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -92,14 +92,18 @@ public class LoginActivity extends AppCompatActivity {
                         }
 
                     });
-
-
-
-
                 } else{
-                    loginStatus.setText(errorMsg3);
+                    Toast.makeText(LoginActivity.this, errorMsg3, Toast.LENGTH_LONG).show();
                 }
             }
         });
+
+     btnSignUp.setOnClickListener(new View.OnClickListener() {
+         @Override
+         public void onClick(View v) {
+             Intent intent = new Intent(LoginActivity.this, RegistrationActivity.class);
+             startActivity(intent);
+         }
+     });
     }
 }

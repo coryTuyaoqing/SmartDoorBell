@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -23,7 +24,7 @@ import okhttp3.Response;
 
 public class RegistrationActivity extends AppCompatActivity {
     OkHttpClient client;
-    private TextView txtFirstName, txtSecondName, txtEmail, registrationStatus;
+    private TextView txtFirstName, txtSecondName, txtEmail;
     Button btnRegister, btnLogin;
     EditText edtTxtFirstName, edtTxtSecondName, edtTxtEmail, edtPassWord, edtPassWordAgain;
 
@@ -45,6 +46,7 @@ public class RegistrationActivity extends AppCompatActivity {
                 String password = edtPassWord.getText().toString();
                 String passwordagain = edtPassWordAgain.getText().toString();
                 String errorMsg = "Passwords do not match";
+                String errorMsg2 = "Please fill in all fields";
 
                 if (!fName.isEmpty() && !lName.isEmpty() && !email.isEmpty() && !password.isEmpty() && !passwordagain.isEmpty() && passwordagain.equals(password)) {
                     // Update TextViews with the entered data
@@ -84,7 +86,10 @@ public class RegistrationActivity extends AppCompatActivity {
 
                 } else {
                     if (!passwordagain.equals(password)) {
-                        registrationStatus.setText(errorMsg);
+                        Toast.makeText(RegistrationActivity.this, errorMsg, Toast.LENGTH_LONG).show();
+                    }
+                    else{
+                        Toast.makeText(RegistrationActivity.this, errorMsg2, Toast.LENGTH_LONG).show();
                     }
                 }
             }
@@ -110,7 +115,6 @@ public class RegistrationActivity extends AppCompatActivity {
         edtTxtSecondName = findViewById(R.id.edtTxtSecondName);
         edtTxtEmail = findViewById(R.id.edtTxtEmail);
         edtPassWord = findViewById(R.id.edtPassWord);
-        edtPassWordAgain = findViewById(R.id.edtPassWordAgain);
-        registrationStatus = findViewById(R.id.registrationStatus); // Initialize registrationStatus TextView
+        edtPassWordAgain = findViewById(R.id.edtPassWordAgain); // Initialize registrationStatus TextView
     }
 }

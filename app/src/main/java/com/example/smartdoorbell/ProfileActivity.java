@@ -32,7 +32,10 @@ public class ProfileActivity extends AppCompatActivity {
         btnProfileLogout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //todo
+                UserInfo userInfo = new UserInfo(getApplicationContext());
+                System.out.println(userInfo.deleteFile());
+                Intent intent = new Intent(ProfileActivity.this, RegistrationActivity.class);
+                startActivity(intent);
             }
         });
     }

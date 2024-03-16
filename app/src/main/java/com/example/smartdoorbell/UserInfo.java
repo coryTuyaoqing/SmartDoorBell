@@ -84,6 +84,10 @@ public class UserInfo {
         return userInfo;
     }
 
+    public boolean deleteFile(){
+        return file.delete();
+    }
+
     public String readFirstName(){
         return readFile()[1];
     }
