@@ -225,7 +225,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void startRecording() {
-        // Initialize MediaRecorder and start recording
+
         mediaRecorder = new MediaRecorder();
         mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
