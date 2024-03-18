@@ -55,7 +55,8 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/txtStatus"
             android:padding="20dp"
-            android:src="@mipmap/camera_photo" />
+            android:src="@mipmap/ic_launcher"
+            android:layout_centerHorizontal="true"/>
 
     </RelativeLayout>
 
