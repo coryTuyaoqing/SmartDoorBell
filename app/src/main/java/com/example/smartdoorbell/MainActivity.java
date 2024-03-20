@@ -32,6 +32,7 @@ import java.io.InputStream;
 
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.FormBody;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
@@ -55,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
     final private String url = "http://192.168.0.106:80/photo";
     private static final String url_audio = "http://192.168.0.106:80/upload_audio";
     private static final String url_audio2 = "http://192.168.0.106:80/download_audio";
+    private static final String url_lock = "http://192.168.0.106:80/lock";
     private static final int RECORD_AUDIO_PERMISSION_REQUEST_CODE = 100;
 
     @Override
@@ -64,18 +66,18 @@ public class MainActivity extends AppCompatActivity {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             if (Environment.isExternalStorageManager()) {
-                // Permission already granted, do nothing
+                // If the permission was already granted, nothing should happen
             } else {
+                //Otherwise an intent is opened to manage settings for app permissions
                 Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
                 intent.setData(Uri.parse("package:" + getPackageName()));
                 startActivity(intent);
             }
         }
-
+        //Check if android version is >6.0 and if record audio permission has NOT been granted
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-
-            // Request RECORD_AUDIO permission
+            //If the RECORD_AUDUO permission has NOT been granted, it must be requested
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, RECORD_AUDIO_PERMISSION_REQUEST_CODE);
 
         } else {
@@ -86,14 +88,19 @@ public class MainActivity extends AppCompatActivity {
         intiView();
         btnProfile.setOnClickListener(new View.OnClickListener() {
             @Override
+            //onClick listener, each btn has one of these, they all override each other
             public void onClick(View v) {
                 Intent intent;
+                //User info has to be stored so that you do not need to give audio recording permissions each time
+                //Also stores login details (initializes application context)
                 UserInfo userInfo = new UserInfo(getApplicationContext());
                 if(userInfo.initInfo()){
+                    //Indicates that the user info has been initialised
                     intent  = new Intent(MainActivity.this, RegistrationActivity.class);
                     startActivity(intent);
                 }
                 else{
+                    //Indicates that the user info has not been initialised
                     intent = new Intent(MainActivity.this, ProfileActivity.class);
                     startActivity(intent);
                 }
@@ -104,17 +111,54 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (doorClosed) {
+                    //If the button is pressed and door was previously closed, the door is set to opened
                     imgBtnLock.setImageResource(R.drawable.ic_unlock);
                     txtDoorStatus.setText("OPENED");
                     doorClosed = false;
                 } else {
                     imgBtnLock.setImageResource(R.drawable.ic_lock);
                     txtDoorStatus.setText("CLOSED");
-                    doorClosed = true
-                    ;
+                    doorClosed = true;
                 }
+
+                //Convert boolean value to string representation
+                String booleanString = String.valueOf(!doorClosed);
+
+                //Create request body containing the boolean value
+                RequestBody requestBody = new FormBody.Builder()
+                        .add("doorClosed", booleanString)
+                        .build();
+
+                //Build the request with the URL and request body
+                Request request = new Request.Builder()
+                        .url(url_lock)
+                        .post(requestBody)
+                        .build();
+
+
+                //Initiate asynchronous HTTP request with okhttp
+                //enqueue method performs the request asynchronously + expects callback to handle the response.
+                client.newCall(request).enqueue(new Callback() {
+                    @Override
+                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                        e.printStackTrace();
+                        Log.e("MainActivity", "Failed to send boolean value to server: " + e.getMessage());
+                    }
+
+                    @Override
+                    public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                        if(response.isSuccessful()){
+                            // Handle successful response from the server
+                            Log.d("MainActivity", "Boolean value sent to server successfully");
+                        } else {
+                            // Handle unsuccessful response from the server
+                            Log.e("MainActivity", "Failed to send boolean value to server: " + response.code());
+                        }
+                    }
+                });
             }
         });
+
 
         imgBtnSpeak.setOnClickListener(new View.OnClickListener() {
             @Override
