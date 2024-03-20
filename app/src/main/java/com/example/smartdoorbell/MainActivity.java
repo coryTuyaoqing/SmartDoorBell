@@ -132,7 +132,8 @@ public class MainActivity extends AppCompatActivity {
                 //Build the request with the URL and request body
                 Request request = new Request.Builder()
                         .url(url_lock)
-                        .post(requestBody)
+                        //.post(requestBody)
+                        .get()
                         .build();
 
 
@@ -140,6 +141,8 @@ public class MainActivity extends AppCompatActivity {
                 //enqueue method performs the request asynchronously + expects callback to handle the response.
                 client.newCall(request).enqueue(new Callback() {
                     @Override
+                    //@NonNull indicates that the field cannot contain null value
+                    //the compiler or analysis tool may generate a warning or error if the value is null
                     public void onFailure(@NonNull Call call, @NonNull IOException e) {
                         e.printStackTrace();
                         Log.e("MainActivity", "Failed to send boolean value to server: " + e.getMessage());
@@ -166,12 +169,16 @@ public class MainActivity extends AppCompatActivity {
                 if(speakable){
                     imgBtnSpeak.setImageResource(R.drawable.ic_deafen);
                     speakable = false;
+                    //When speakable becomes false, indicating that the audio should not be recorded,
+                    //stopAudio is called
                     stopAudio();
+                    //Audio that was recorded is uploaded
                     uploadAudioFile(file);
                 }
                 else{
                     imgBtnSpeak.setImageResource(R.drawable.ic_speak);
                     speakable = true;
+                    //When speakable becomes true then audio recording should start
                     startRecording();
                 }
             }
@@ -183,6 +190,7 @@ public class MainActivity extends AppCompatActivity {
                 Request request = new Request.Builder().url(url).build();
                 client.newCall(request).enqueue(new Callback() {
                     @Override
+                    //Called when the request could not be executed due to cancellation, a connectivity problem or timeout.
                     public void onFailure(@NonNull Call call, @NonNull IOException e) {
                         e.printStackTrace();
                         System.out.println(url);
@@ -190,13 +198,19 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                        //Check whether or not the response was successful, indicating that the request was
+                        //successfully received, understood, and accepted.
                         if (response.isSuccessful()){
                             final Bitmap bitmap = BitmapFactory.decodeStream(response.body().byteStream());
-                            // Remember to set the bitmap in the main thread.
+                            //Remember to set the bitmap in the main thread.
+                            //Schedule a task to be executed on the main UI thread using Handler
+                            //Looper.getMainLooper() is responsible for running tasks on the main thread
+                            //Method runnable has run()
                             new Handler(Looper.getMainLooper()).post(new Runnable() {
                                 @Override
                                 public void run() {
                                     cameraPhoto.setImageBitmap(bitmap);
+                                    //Sets the Bitmap (bitmap) to be displayed in the ImageView (cameraPhoto) using cameraPhoto.setImageBitmap(bitmap).
                                 }
                             });
                         }else {
