@@ -1,10 +1,10 @@
 package com.example.smartdoorbell;
 
+import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Build;
@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
-import android.provider.MediaStore;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
@@ -20,7 +19,6 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.Manifest;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -40,7 +38,7 @@ import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Button btnProfile;
+    private Button btnProfile, btnPressToSpeak;
     private TextView txtDoorStatus;
     private ImageView cameraPhoto;
 
@@ -51,8 +49,8 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton imgBtnLock, imgBtnSpeak, imgBtnCamera;
     private boolean doorClosed, speakable;
     private OkHttpClient client;
-    final private String url = "http://192.168.1.103/photo";
-    private static final String url_audio = "http://192.168.1.103/upload_audio"; //CHANGE THIS!!!!!
+    final private String url = "http://192.168.0.106:80/photo";
+    private static final String url_audio = "http://192.168.0.106:80/upload_audio"; //CHANGE THIS!!!!!
     private static final int RECORD_AUDIO_PERMISSION_REQUEST_CODE = 100;
 
     @Override
@@ -129,51 +127,6 @@ public class MainActivity extends AppCompatActivity {
                     startRecording();
                 }
             }
-
-            private void stopAudio() {
-                mediaRecorder.stop();
-                mediaRecorder.release();
-            }
-
-            private void uploadAudioFile(final String filePath) {
-                final File audioFile = new File(filePath);
-                if (!audioFile.exists()) {
-                    Log.e("MainActivity", "Audio file not found");
-                    return;
-                }
-
-                // Create a multipart request body
-                RequestBody requestBody = new MultipartBody.Builder()
-                        .setType(MultipartBody.FORM)
-                        .addFormDataPart("file", audioFile.getName(),
-                                RequestBody.create(audioFile, MediaType.parse("audio/3gpp")))
-                        .build();
-
-                Request request = new Request.Builder()
-                        .url(url_audio)
-                        .post(requestBody)
-                        .build();
-
-                client.newCall(request).enqueue(new okhttp3.Callback() {
-                    @Override
-                    public void onFailure(okhttp3.Call call, IOException e) {
-                        e.printStackTrace();
-                        Log.e("MainActivity", "Failed to upload audio", e);
-                    }
-
-                    @Override
-                    public void onResponse(okhttp3.Call call, Response response) throws IOException {
-                        if (response.isSuccessful()) {
-                            // Handle successful upload
-                            Log.d("MainActivity", "Audio uploaded successfully");
-                        } else {
-                            // Handle failed upload
-                            Log.e("MainActivity", "Failed to upload audio: " + response.code());
-                        }
-                    }
-                });
-            }
-
         });
 
         imgBtnCamera.setOnClickListener(new View.OnClickListener() {
@@ -205,8 +158,16 @@ public class MainActivity extends AppCompatActivity {
                 });
             }
         });
+
+        btnPressToSpeak.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                
+            }
+        });
     }
 
+    @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
@@ -240,9 +201,53 @@ public class MainActivity extends AppCompatActivity {
             Log.e("MainActivity", "Failed to start recording: " + e.getMessage());
         }
     }
+    private void stopAudio() {
+        mediaRecorder.stop();
+        mediaRecorder.release();
+    }
+
+    private void uploadAudioFile(final String filePath) {
+        final File audioFile = new File(filePath);
+        if (!audioFile.exists()) {
+            Log.e("MainActivity", "Audio file not found");
+            return;
+        }
+
+        // Create a multipart request body
+        RequestBody requestBody = new MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("file", audioFile.getName(),
+                        RequestBody.create(audioFile, MediaType.parse("audio/3gpp")))
+                .build();
+
+        Request request = new Request.Builder()
+                .url(url_audio)
+                .post(requestBody)
+                .build();
+
+        client.newCall(request).enqueue(new okhttp3.Callback() {
+            @Override
+            public void onFailure(okhttp3.Call call, IOException e) {
+                e.printStackTrace();
+                Log.e("MainActivity", "Failed to upload audio", e);
+            }
+
+            @Override
+            public void onResponse(okhttp3.Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    // Handle successful upload
+                    Log.d("MainActivity", "Audio uploaded successfully");
+                } else {
+                    // Handle failed upload
+                    Log.e("MainActivity", "Failed to upload audio: " + response.code());
+                }
+            }
+        });
+    }
 
     private void intiView() {
         btnProfile = findViewById(R.id.btnProfile);
+        btnPressToSpeak = findViewById(R.id.btnPressToSpeak);
         txtDoorStatus = findViewById(R.id.txtDoorStatus);
         imgBtnLock = findViewById(R.id.imgBtnLock);
         imgBtnSpeak = findViewById(R.id.imgBtnSpeak);
