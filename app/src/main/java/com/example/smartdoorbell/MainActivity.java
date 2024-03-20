@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Build;
@@ -25,7 +26,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -50,7 +53,8 @@ public class MainActivity extends AppCompatActivity {
     private boolean doorClosed, speakable;
     private OkHttpClient client;
     final private String url = "http://192.168.0.106:80/photo";
-    private static final String url_audio = "http://192.168.0.106:80/upload_audio"; //CHANGE THIS!!!!!
+    private static final String url_audio = "http://192.168.0.106:80/upload_audio";
+    private static final String url_audio2 = "http://192.168.0.106:80/download_audio";
     private static final int RECORD_AUDIO_PERMISSION_REQUEST_CODE = 100;
 
     @Override
@@ -162,7 +166,49 @@ public class MainActivity extends AppCompatActivity {
         btnPressToSpeak.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                
+                Request request = new Request.Builder().url(url_audio2).build();
+                client.newCall(request).enqueue(new Callback() {
+                    @Override
+                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                        e.printStackTrace();
+                        System.out.println(url_audio2);
+                    }
+
+                    @Override
+                    public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                        if (response.isSuccessful()){
+                            final InputStream inputStream = response.body().byteStream();
+                            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        File tempAudioFile = File.createTempFile("temp_audio", ".wav", getCacheDir());
+                                        FileOutputStream outputStream = new FileOutputStream(tempAudioFile);
+
+                                        byte[] buffer = new byte[1024];
+                                        int bytesRead;
+                                        while ((bytesRead = inputStream.read(buffer)) != -1) {
+                                            outputStream.write(buffer, 0, bytesRead);
+                                        }
+
+                                        inputStream.close();
+                                        outputStream.close();
+
+                                        MediaPlayer mediaPlayer = new MediaPlayer();
+                                        mediaPlayer.setDataSource(tempAudioFile.getAbsolutePath());
+                                        mediaPlayer.prepare();
+                                        mediaPlayer.start();
+
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            });
+                        } else {
+                            // Handle the error
+                        }
+                    }
+                });
             }
         });
     }
@@ -173,11 +219,10 @@ public class MainActivity extends AppCompatActivity {
 
         if (requestCode == RECORD_AUDIO_PERMISSION_REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permission granted, start recording
+                // Permission has been granted by the user, recording can be started
                 startRecording();
             } else {
-                // Permission denied, handle accordingly (e.g., show a message to the user)
-                // You may want to disable functionality that requires the permission
+                //Nothing can happen if this is blocked, the functionality will simply not work
                 Log.e("MainActivity", "RECORD_AUDIO permission denied");
             }
         }
@@ -186,7 +231,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void startRecording() {
-
+        //Initialising mediarecorder
         mediaRecorder = new MediaRecorder();
         mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
