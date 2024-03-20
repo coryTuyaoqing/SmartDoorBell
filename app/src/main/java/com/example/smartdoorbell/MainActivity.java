@@ -57,12 +57,29 @@ public class MainActivity extends AppCompatActivity {
     private static final String url_audio = "http://192.168.0.106:80/upload_audio";
     private static final String url_audio2 = "http://192.168.0.106:80/download_audio";
     private static final String url_lock = "http://192.168.0.106:80/lock";
+    private static final String url_door_status = "http://192.168.0.106:80/doorstatus";
     private static final int RECORD_AUDIO_PERMISSION_REQUEST_CODE = 100;
+    private Handler timerHandler = new Handler();
+    private Runnable timerRunnable;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Runnable timerRunnable = new Runnable() {
+            @Override
+            public void run() {
+                updateDoorStatus();
+                // Re-run this Runnable after 50ms
+                timerHandler.postDelayed(this, 50);
+            }
+        };
+
+        // Start the timer
+        timerHandler.postDelayed(timerRunnable, 50);
+        
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             if (Environment.isExternalStorageManager()) {
@@ -271,6 +288,30 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void updateDoorStatus(){
+        Request request = new Request.Builder().url(url_door_status).build();
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                e.printStackTrace();
+                System.out.println(url_door_status);
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if(response.isSuccessful()){
+                    String responseBody = response.body().string();
+                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            txtDoorStatus.setText(responseBody);
+                        }
+                    });
+                }
+            }
+        });
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -360,5 +401,7 @@ public class MainActivity extends AppCompatActivity {
         speakable = false;
         client = new OkHttpClient();
     }
+
+
 
 }
