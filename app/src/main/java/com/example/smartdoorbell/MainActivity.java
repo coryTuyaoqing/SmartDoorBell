@@ -53,11 +53,12 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton imgBtnLock, imgBtnSpeak, imgBtnCamera;
     private boolean doorClosed, speakable;
     private OkHttpClient client;
-    final private String url = "http://192.168.0.106:80/photo";
-    private static final String url_audio = "http://192.168.0.106:80/upload_audio";
-    private static final String url_audio2 = "http://192.168.0.106:80/download_audio";
-    private static final String url_lock = "http://192.168.0.106:80/lock";
-    private static final String url_door_status = "http://192.168.0.106:80/doorstatus";
+    final private String ip = "http://192.168.82.160:80";
+    final private String url = ip + "/photo";
+    private final String url_audio = ip + "/upload_audio";
+    private final String url_audio2 = ip + "/download_audio";
+    private final String url_lock = ip + "/unlock";
+    private final String url_door_status = ip + "/doorstatus";
     private static final int RECORD_AUDIO_PERMISSION_REQUEST_CODE = 100;
     private Handler timerHandler = new Handler();
     private Runnable timerRunnable;
@@ -92,8 +93,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         //Check if android version is >6.0 and if record audio permission has NOT been granted
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-                ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             //If the RECORD_AUDUO permission has NOT been granted, it must be requested
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, RECORD_AUDIO_PERMISSION_REQUEST_CODE);
 
@@ -127,16 +127,16 @@ public class MainActivity extends AppCompatActivity {
         imgBtnLock.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (doorClosed) {
-                    //If the button is pressed and door was previously closed, the door is set to opened
-                    imgBtnLock.setImageResource(R.drawable.ic_unlock);
-                    txtDoorStatus.setText("OPENED");
-                    doorClosed = false;
-                } else {
-                    imgBtnLock.setImageResource(R.drawable.ic_lock);
-                    txtDoorStatus.setText("CLOSED");
-                    doorClosed = true;
-                }
+//                if (doorClosed) {
+//                    //If the button is pressed and door was previously closed, the door is set to opened
+//                    imgBtnLock.setImageResource(R.drawable.ic_unlock);
+////                    txtDoorStatus.setText("OPENED");
+////                    doorClosed = false;
+//                } else {
+//                    imgBtnLock.setImageResource(R.drawable.ic_lock);
+//                    txtDoorStatus.setText("close");
+//                    doorClosed = true;
+//                }
 
                 //Convert boolean value to string representation
                 String booleanString = String.valueOf(!doorClosed);
@@ -304,6 +304,16 @@ public class MainActivity extends AppCompatActivity {
                     new Handler(Looper.getMainLooper()).post(new Runnable() {
                         @Override
                         public void run() {
+                            if(responseBody.equals("close")){
+                                imgBtnLock.setImageResource(R.drawable.ic_lock);
+                            }
+                            else if(responseBody.equals("open")){
+                                imgBtnLock.setImageResource(R.drawable.ic_unlock);
+                            }
+                            else{
+                                System.out.println(responseBody);
+                                return;
+                            }
                             txtDoorStatus.setText(responseBody);
                         }
                     });
