@@ -30,6 +30,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import io.socket.client.Socket;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.FormBody;
@@ -39,11 +40,10 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-
 public class MainActivity extends AppCompatActivity {
 
     private Button btnProfile, btnPressToSpeak;
-    private TextView txtDoorStatus;
+    private TextView txtDoorStatus, txtStatus;
     private ImageView cameraPhoto;
 
     private MediaRecorder mediaRecorder;
@@ -53,34 +53,22 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton imgBtnLock, imgBtnSpeak, imgBtnCamera;
     private boolean doorClosed, speakable;
     private OkHttpClient client;
-    final private String ip = "http://192.168.82.160:80";
+    final private String ip = "http://192.168.0.107";
     final private String url = ip + "/photo";
     private final String url_audio = ip + "/upload_audio";
     private final String url_audio2 = ip + "/download_audio";
-    private final String url_lock = ip + "/unlock";
+    private final String url_unlock = ip + "/unlock";
     private final String url_door_status = ip + "/doorstatus";
     private static final int RECORD_AUDIO_PERMISSION_REQUEST_CODE = 100;
     private Handler timerHandler = new Handler();
     private Runnable timerRunnable;
+    private Socket socket;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        Runnable timerRunnable = new Runnable() {
-            @Override
-            public void run() {
-                updateDoorStatus();
-                // Re-run this Runnable after 50ms
-                timerHandler.postDelayed(this, 50);
-            }
-        };
-
-        // Start the timer
-        timerHandler.postDelayed(timerRunnable, 50);
-        
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             if (Environment.isExternalStorageManager()) {
@@ -97,7 +85,8 @@ public class MainActivity extends AppCompatActivity {
             //If the RECORD_AUDUO permission has NOT been granted, it must be requested
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, RECORD_AUDIO_PERMISSION_REQUEST_CODE);
 
-        } else {
+        }
+        else {
             // Permission is already granted, start recording
             startRecording();
         }
@@ -127,17 +116,9 @@ public class MainActivity extends AppCompatActivity {
         imgBtnLock.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                if (doorClosed) {
-//                    //If the button is pressed and door was previously closed, the door is set to opened
-//                    imgBtnLock.setImageResource(R.drawable.ic_unlock);
-////                    txtDoorStatus.setText("OPENED");
-////                    doorClosed = false;
-//                } else {
-//                    imgBtnLock.setImageResource(R.drawable.ic_lock);
-//                    txtDoorStatus.setText("close");
-//                    doorClosed = true;
-//                }
-
+                if(txtDoorStatus.getText().equals("CLOSE")){
+                    imgBtnLock.setImageResource(R.drawable.ic_unlock);
+                }
                 //Convert boolean value to string representation
                 String booleanString = String.valueOf(!doorClosed);
 
@@ -148,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
 
                 //Build the request with the URL and request body
                 Request request = new Request.Builder()
-                        .url(url_lock)
+                        .url(url_unlock)
                         //.post(requestBody)
                         .get()
                         .build();
@@ -235,6 +216,18 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 });
+
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            Thread.sleep(10000);
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
+                        runOnUiThread(() -> cameraPhoto.setImageResource(R.drawable.ic_doorway_spot));
+                    }
+                }).start();
             }
         });
 
@@ -286,40 +279,54 @@ public class MainActivity extends AppCompatActivity {
                 });
             }
         });
-    }
 
-    private void updateDoorStatus(){
-        Request request = new Request.Builder().url(url_door_status).build();
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                e.printStackTrace();
-                System.out.println(url_door_status);
-            }
+//        Runnable timerRunnable = new Runnable() {
+//            @Override
+//            public void run() {
+//                updateDoorStatus();
+//                // Re-run this Runnable after 50ms
+//                timerHandler.postDelayed(this, 50);
+//            }
+//        };
+//
+//        // Start the timer
+//        timerHandler.postDelayed(timerRunnable, 50);
 
-            @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if(response.isSuccessful()){
-                    String responseBody = response.body().string();
-                    new Handler(Looper.getMainLooper()).post(new Runnable() {
-                        @Override
-                        public void run() {
-                            if(responseBody.equals("close")){
-                                imgBtnLock.setImageResource(R.drawable.ic_lock);
-                            }
-                            else if(responseBody.equals("open")){
-                                imgBtnLock.setImageResource(R.drawable.ic_unlock);
-                            }
-                            else{
-                                System.out.println(responseBody);
-                                return;
-                            }
-                            txtDoorStatus.setText(responseBody);
+        socket.on("message", args -> {
+            String message = (String) args[0];
+            switch (message) {
+                case "Some one is at the door!":
+                    System.out.println("Some one is at the door!");
+                    new Thread(() -> {
+                        try {
+                            runOnUiThread(() -> txtStatus.setText(message));
+                            Thread.sleep(5000);
+                            runOnUiThread(() -> txtStatus.setText(""));
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
                         }
+                    }).start();
+                    break;
+                case "The door is opened":
+                    System.out.println("The door is opened");
+                    runOnUiThread(() -> {
+                        txtDoorStatus.setText("OPEN");
                     });
-                }
+                    break;
+                case "The door is closed":
+                    System.out.println("The door is closed");
+                    runOnUiThread(() -> {
+                        txtDoorStatus.setText("CLOSE");
+                        imgBtnLock.setImageResource(R.drawable.ic_lock);
+                    });
+                    break;
+                default:
+                    System.out.println("incorrect message");
+                    break;
             }
         });
+
+        socket.connect();
     }
 
     @Override
@@ -335,8 +342,6 @@ public class MainActivity extends AppCompatActivity {
                 Log.e("MainActivity", "RECORD_AUDIO permission denied");
             }
         }
-
-
     }
 
     private void startRecording() {
@@ -397,12 +402,51 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
+
     }
+
+
+//    private void updateDoorStatus(){
+//        Request request = new Request.Builder().url(url_door_status).build();
+//        client.newCall(request).enqueue(new Callback() {
+//            @Override
+//            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+//                e.printStackTrace();
+//                System.out.println(url_door_status);
+//            }
+//
+//            @Override
+//            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+//                if(response.isSuccessful()){
+//                    String responseBody = response.body().string();
+//                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            if(responseBody.equals("close")){
+//                                imgBtnLock.setImageResource(R.drawable.ic_lock);
+//                            }
+//                            else if(responseBody.equals("open")){
+//                                imgBtnLock.setImageResource(R.drawable.ic_unlock);
+//                            }
+//                            else{
+//                                System.out.println(responseBody);
+//                                return;
+//                            }
+//                            txtDoorStatus.setText(responseBody);
+//                        }
+//                    });
+//                }
+//            }
+//        });
+//    }
+
 
     private void intiView() {
         btnProfile = findViewById(R.id.btnProfile);
         btnPressToSpeak = findViewById(R.id.btnPressToSpeak);
         txtDoorStatus = findViewById(R.id.txtDoorStatus);
+        txtStatus = findViewById(R.id.txtStatus);
         imgBtnLock = findViewById(R.id.imgBtnLock);
         imgBtnSpeak = findViewById(R.id.imgBtnSpeak);
         imgBtnCamera = findViewById(R.id.imgBtnTakePhoto);
@@ -410,8 +454,6 @@ public class MainActivity extends AppCompatActivity {
         doorClosed = true;
         speakable = false;
         client = new OkHttpClient();
+        socket = SocketManager.getInstance();
     }
-
-
-
 }
