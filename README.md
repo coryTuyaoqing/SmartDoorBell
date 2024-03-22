@@ -1,3 +1,6 @@
+## Samrt Door Bell raspberry pi python project link:
+https://github.com/coryTuyaoqing/SmartDoorBell_Pi
+
 # How to clone this project?
 * Android studio -> file -> new -> project from version control
 * copy and paste the URL link of this repository
