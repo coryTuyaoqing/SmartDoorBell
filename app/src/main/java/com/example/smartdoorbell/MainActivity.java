@@ -20,6 +20,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.VideoView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -45,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
     private Button btnProfile, btnPressToSpeak;
     private TextView txtDoorStatus, txtStatus;
     private ImageView cameraPhoto;
+    private VideoView videoView;
 
     private MediaRecorder mediaRecorder;
     public static String fileName = "recorded.3gp";
@@ -199,12 +201,27 @@ public class MainActivity extends AppCompatActivity {
                         // Check whether or not the response was successful, indicating that the request was
                         // successfully received, understood, and accepted.
                         if (response.isSuccessful()) {
-                            final Bitmap bitmap = BitmapFactory.decodeStream(response.body().byteStream());
-                            // Set the bitmap in the main thread.
+                            final InputStream inputStream = response.body().byteStream();
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    cameraPhoto.setImageBitmap(bitmap);
+                                    // Set the video stream to the VideoView
+                                    videoView.setVideoURI(Uri.parse(url));
+                                    // Start playing the video
+                                    videoView.start();
+                                    // Make VideoView visible
+                                    videoView.setVisibility(View.VISIBLE);
+
+                                    // Set up completion listener to freeze last frame
+                                    videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                                        @Override
+                                        public void onCompletion(MediaPlayer mp) {
+                                            // Pause the video playback
+                                            videoView.pause();
+                                            // Seek to the end of the video to display the last frame
+                                            videoView.seekTo(videoView.getDuration());
+                                        }
+                                    });
                                 }
                             });
                         } else {
@@ -274,174 +291,16 @@ public class MainActivity extends AppCompatActivity {
                         } catch (InterruptedException e) {
                             throw new RuntimeException(e);
                         }
-                        runOnUiThread(() -> cameraPhoto.setImageResource(R.drawable.ic_doorway_spot));
+                        runOnUiThread(() -> {
+                            // Stop video playback after 10 seconds
+                            videoView.stopPlayback();
+                            // Make VideoView invisible
+                            videoView.setVisibility(View.INVISIBLE);
+                        });
                     }
                 }).start();
             }
         });
-
-        /*imgBtnCamera.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Request cameraRequest = new Request.Builder().url(url).build();
-                client.newCall(cameraRequest).enqueue(new Callback() {
-                    @Override
-                    //Called when the request could not be executed due to cancellation, a connectivity problem or timeout.
-                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                        e.printStackTrace();
-                        System.out.println(url);
-                    }
-
-                    @Override
-                    public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                        //Check whether or not the response was successful, indicating that the request was
-                        //successfully received, understood, and accepted.
-                        if (response.isSuccessful()){
-                            final Bitmap bitmap = BitmapFactory.decodeStream(response.body().byteStream());
-                            //Remember to set the bitmap in the main thread.
-                            //Schedule a task to be executed on the main UI thread using Handler
-                            //Looper.getMainLooper() is responsible for running tasks on the main thread
-                            //Method runnable has run()
-                            new Handler(Looper.getMainLooper()).post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    cameraPhoto.setImageBitmap(bitmap);
-                                    //Sets the Bitmap (bitmap) to be displayed in the ImageView (cameraPhoto) using cameraPhoto.setImageBitmap(bitmap).
-                                }
-                            });
-                        }else {
-                            //Handle the error
-                        }
-                    }
-                });
-
-                Request audioRequest = new Request.Builder().url(url_audio2).build();
-                client.newCall(audioRequest).enqueue(new Callback() {
-                    @Override
-                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                        e.printStackTrace();
-                        System.out.println(url_audio2);
-                    }
-
-                    @Override
-                    public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                        if (response.isSuccessful()){
-                            final InputStream inputStream = response.body().byteStream();
-                            try {
-                                // Create a temporary audio file
-                                File tempAudioFile = File.createTempFile("temp_audio", ".wav", getCacheDir());
-                                FileOutputStream outputStream = new FileOutputStream(tempAudioFile);
-
-                                // Write audio data to the temporary file
-                                byte[] buffer = new byte[1024];
-                                int bytesRead;
-                                while ((bytesRead = inputStream.read(buffer)) != -1) {
-                                    outputStream.write(buffer, 0, bytesRead);
-                                }
-
-                                // Close streams
-                                inputStream.close();
-                                outputStream.close();
-
-                                // Post a runnable to the main thread for playing audio
-                                new Handler(Looper.getMainLooper()).post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        try {
-                                            // Create MediaPlayer and play audio
-                                            MediaPlayer mediaPlayer = new MediaPlayer();
-                                            mediaPlayer.setDataSource(tempAudioFile.getAbsolutePath());
-                                            mediaPlayer.prepare();
-                                            mediaPlayer.start();
-                                        } catch (IOException e) {
-                                            e.printStackTrace();
-                                        }
-                                    }
-                                });
-
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        } else {
-                            // Handle the error
-                        }
-                    }
-                });
-
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            Thread.sleep(10000);
-                        } catch (InterruptedException e) {
-                            throw new RuntimeException(e);
-                        }
-                        runOnUiThread(() -> cameraPhoto.setImageResource(R.drawable.ic_doorway_spot));
-                    }
-                }).start();
-            }
-        });*/
-
-        /*btnPressToSpeak.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Request request = new Request.Builder().url(url_audio2).build();
-                client.newCall(request).enqueue(new Callback() {
-                    @Override
-                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                        e.printStackTrace();
-                        System.out.println(url_audio2);
-                    }
-
-                    @Override
-                    public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                        if (response.isSuccessful()){
-                            final InputStream inputStream = response.body().byteStream();
-                            new Handler(Looper.getMainLooper()).post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    try {
-                                        File tempAudioFile = File.createTempFile("temp_audio", ".wav", getCacheDir());
-                                        FileOutputStream outputStream = new FileOutputStream(tempAudioFile);
-
-                                        byte[] buffer = new byte[1024];
-                                        int bytesRead;
-                                        while ((bytesRead = inputStream.read(buffer)) != -1) {
-                                            outputStream.write(buffer, 0, bytesRead);
-                                        }
-
-                                        inputStream.close();
-                                        outputStream.close();
-
-                                        MediaPlayer mediaPlayer = new MediaPlayer();
-                                        mediaPlayer.setDataSource(tempAudioFile.getAbsolutePath());
-                                        mediaPlayer.prepare();
-                                        mediaPlayer.start();
-
-                                    } catch (IOException e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                            });
-                        } else {
-                            // Handle the error
-                        }
-                    }
-                });
-            }
-        });*/
-
-//        Runnable timerRunnable = new Runnable() {
-//            @Override
-//            public void run() {
-//                updateDoorStatus();
-//                // Re-run this Runnable after 50ms
-//                timerHandler.postDelayed(this, 50);
-//            }
-//        };
-//
-//        // Start the timer
-//        timerHandler.postDelayed(timerRunnable, 50);
 
         socket.on("message", args -> {
             String message = (String) args[0];
@@ -557,42 +416,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-
-//    private void updateDoorStatus(){
-//        Request request = new Request.Builder().url(url_door_status).build();
-//        client.newCall(request).enqueue(new Callback() {
-//            @Override
-//            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-//                e.printStackTrace();
-//                System.out.println(url_door_status);
-//            }
-//
-//            @Override
-//            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-//                if(response.isSuccessful()){
-//                    String responseBody = response.body().string();
-//                    new Handler(Looper.getMainLooper()).post(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            if(responseBody.equals("close")){
-//                                imgBtnLock.setImageResource(R.drawable.ic_lock);
-//                            }
-//                            else if(responseBody.equals("open")){
-//                                imgBtnLock.setImageResource(R.drawable.ic_unlock);
-//                            }
-//                            else{
-//                                System.out.println(responseBody);
-//                                return;
-//                            }
-//                            txtDoorStatus.setText(responseBody);
-//                        }
-//                    });
-//                }
-//            }
-//        });
-//    }
-
-
     private void intiView() {
         btnProfile = findViewById(R.id.btnProfile);
         btnPressToSpeak = findViewById(R.id.btnPressToSpeak);
@@ -602,6 +425,7 @@ public class MainActivity extends AppCompatActivity {
         imgBtnSpeak = findViewById(R.id.imgBtnSpeak);
         imgBtnCamera = findViewById(R.id.imgBtnTakePhoto);
         cameraPhoto = findViewById(R.id.cameraPhoto);
+        videoView = findViewById(R.id.videoView);
         doorClosed = true;
         speakable = false;
         client = new OkHttpClient();

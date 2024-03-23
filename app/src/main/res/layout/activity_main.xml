@@ -57,6 +57,16 @@
             android:src="@drawable/ic_doorway_spot"
             android:layout_centerHorizontal="true"/>
 
+        <VideoView
+            android:id="@+id/videoView"
+            android:layout_width="wrap_content"
+            android:layout_height="200dp"
+            android:layout_below="@+id/txtStatus"
+            android:layout_centerHorizontal="true"
+            android:src="@drawable/ic_doorway_spot" />
+
+
+
     </RelativeLayout>
 
     <RelativeLayout
