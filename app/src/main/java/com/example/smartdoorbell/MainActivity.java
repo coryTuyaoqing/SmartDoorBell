@@ -43,9 +43,8 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 public class MainActivity extends AppCompatActivity {
 
-    private Button btnProfile, btnPressToSpeak;
+    private Button btnProfile;
     private TextView txtDoorStatus, txtStatus;
-    private ImageView cameraPhoto;
     private VideoView videoView;
 
     private MediaRecorder mediaRecorder;
@@ -201,7 +200,6 @@ public class MainActivity extends AppCompatActivity {
                         // Check whether or not the response was successful, indicating that the request was
                         // successfully received, understood, and accepted.
                         if (response.isSuccessful()) {
-                            final InputStream inputStream = response.body().byteStream();
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
@@ -229,6 +227,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 });
+
 
                 Request audioRequest = new Request.Builder().url(url_audio2).build();
                 client.newCall(audioRequest).enqueue(new Callback() {
@@ -418,13 +417,11 @@ public class MainActivity extends AppCompatActivity {
 
     private void intiView() {
         btnProfile = findViewById(R.id.btnProfile);
-        btnPressToSpeak = findViewById(R.id.btnPressToSpeak);
         txtDoorStatus = findViewById(R.id.txtDoorStatus);
         txtStatus = findViewById(R.id.txtStatus);
         imgBtnLock = findViewById(R.id.imgBtnLock);
         imgBtnSpeak = findViewById(R.id.imgBtnSpeak);
         imgBtnCamera = findViewById(R.id.imgBtnTakePhoto);
-        cameraPhoto = findViewById(R.id.cameraPhoto);
         videoView = findViewById(R.id.videoView);
         doorClosed = true;
         speakable = false;
