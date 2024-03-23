@@ -182,11 +182,109 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
         imgBtnCamera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Request request = new Request.Builder().url(url).build();
-                client.newCall(request).enqueue(new Callback() {
+                Request cameraRequest = new Request.Builder().url(url).build();
+                client.newCall(cameraRequest).enqueue(new Callback() {
+                    @Override
+                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                        e.printStackTrace();
+                        System.out.println(url);
+                    }
+
+                    @Override
+                    public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                        // Check whether or not the response was successful, indicating that the request was
+                        // successfully received, understood, and accepted.
+                        if (response.isSuccessful()) {
+                            final Bitmap bitmap = BitmapFactory.decodeStream(response.body().byteStream());
+                            // Set the bitmap in the main thread.
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    cameraPhoto.setImageBitmap(bitmap);
+                                }
+                            });
+                        } else {
+                            // Handle the error
+                        }
+                    }
+                });
+
+                Request audioRequest = new Request.Builder().url(url_audio2).build();
+                client.newCall(audioRequest).enqueue(new Callback() {
+                    @Override
+                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                        e.printStackTrace();
+                        System.out.println(url_audio2);
+                    }
+
+                    @Override
+                    public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                        if (response.isSuccessful()) {
+                            final InputStream inputStream = response.body().byteStream();
+                            try {
+                                // Create a temporary audio file
+                                File tempAudioFile = File.createTempFile("temp_audio", ".wav", getCacheDir());
+                                FileOutputStream outputStream = new FileOutputStream(tempAudioFile);
+
+                                // Write audio data to the temporary file
+                                byte[] buffer = new byte[1024];
+                                int bytesRead;
+                                while ((bytesRead = inputStream.read(buffer)) != -1) {
+                                    outputStream.write(buffer, 0, bytesRead);
+                                }
+
+                                // Close streams
+                                inputStream.close();
+                                outputStream.close();
+
+                                // Post a runnable to the main thread for playing audio
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        try {
+                                            // Create MediaPlayer and play audio
+                                            MediaPlayer mediaPlayer = new MediaPlayer();
+                                            mediaPlayer.setDataSource(tempAudioFile.getAbsolutePath());
+                                            mediaPlayer.prepare();
+                                            mediaPlayer.start();
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                });
+
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        } else {
+                            // Handle the error
+                        }
+                    }
+                });
+
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            Thread.sleep(10000);
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
+                        runOnUiThread(() -> cameraPhoto.setImageResource(R.drawable.ic_doorway_spot));
+                    }
+                }).start();
+            }
+        });
+
+        /*imgBtnCamera.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Request cameraRequest = new Request.Builder().url(url).build();
+                client.newCall(cameraRequest).enqueue(new Callback() {
                     @Override
                     //Called when the request could not be executed due to cancellation, a connectivity problem or timeout.
                     public void onFailure(@NonNull Call call, @NonNull IOException e) {
@@ -217,6 +315,59 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 
+                Request audioRequest = new Request.Builder().url(url_audio2).build();
+                client.newCall(audioRequest).enqueue(new Callback() {
+                    @Override
+                    public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                        e.printStackTrace();
+                        System.out.println(url_audio2);
+                    }
+
+                    @Override
+                    public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                        if (response.isSuccessful()){
+                            final InputStream inputStream = response.body().byteStream();
+                            try {
+                                // Create a temporary audio file
+                                File tempAudioFile = File.createTempFile("temp_audio", ".wav", getCacheDir());
+                                FileOutputStream outputStream = new FileOutputStream(tempAudioFile);
+
+                                // Write audio data to the temporary file
+                                byte[] buffer = new byte[1024];
+                                int bytesRead;
+                                while ((bytesRead = inputStream.read(buffer)) != -1) {
+                                    outputStream.write(buffer, 0, bytesRead);
+                                }
+
+                                // Close streams
+                                inputStream.close();
+                                outputStream.close();
+
+                                // Post a runnable to the main thread for playing audio
+                                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        try {
+                                            // Create MediaPlayer and play audio
+                                            MediaPlayer mediaPlayer = new MediaPlayer();
+                                            mediaPlayer.setDataSource(tempAudioFile.getAbsolutePath());
+                                            mediaPlayer.prepare();
+                                            mediaPlayer.start();
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                });
+
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        } else {
+                            // Handle the error
+                        }
+                    }
+                });
+
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
@@ -229,9 +380,9 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }).start();
             }
-        });
+        });*/
 
-        btnPressToSpeak.setOnClickListener(new View.OnClickListener() {
+        /*btnPressToSpeak.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Request request = new Request.Builder().url(url_audio2).build();
@@ -278,7 +429,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
             }
-        });
+        });*/
 
 //        Runnable timerRunnable = new Runnable() {
 //            @Override

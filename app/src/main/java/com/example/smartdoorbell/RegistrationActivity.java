@@ -24,7 +24,6 @@ import okhttp3.Response;
 
 public class RegistrationActivity extends AppCompatActivity {
     OkHttpClient client;
-    private TextView txtFirstName, txtSecondName, txtEmail;
     Button btnRegister, btnLogin;
     EditText edtTxtFirstName, edtTxtSecondName, edtTxtEmail, edtPassWord, edtPassWordAgain;
 
@@ -49,11 +48,6 @@ public class RegistrationActivity extends AppCompatActivity {
                 String errorMsg2 = "Please fill in all fields";
 
                 if (!fName.isEmpty() && !lName.isEmpty() && !email.isEmpty() && !password.isEmpty() && !passwordagain.isEmpty() && passwordagain.equals(password)) {
-                    // Update TextViews with the entered data
-                    txtFirstName.setText(fName);
-                    txtSecondName.setText(lName);
-                    txtEmail.setText(email);
-
                     RequestBody requestBody = new FormBody.Builder()
                             .add("fn", fName)
                             .add("ln", lName)
@@ -106,9 +100,6 @@ public class RegistrationActivity extends AppCompatActivity {
     }
 
     private void initView() {
-        txtFirstName = findViewById(R.id.txtFirstName);
-        txtSecondName = findViewById(R.id.txtSecondName);
-        txtEmail = findViewById(R.id.txtEmail);
         btnRegister = findViewById(R.id.btnRegist);
         btnLogin = findViewById(R.id.btnLogin);
         edtTxtFirstName = findViewById(R.id.edtTxtFirstName);
