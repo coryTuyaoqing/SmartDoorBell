@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             if (Environment.isExternalStorageManager()) {
-                // If the permission was already granted, nothing should happen
+                // If the permission for storage usage was already granted, nothing should happen
             } else {
                 //Otherwise an intent is opened to manage settings for app permissions
                 Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
@@ -89,7 +89,6 @@ public class MainActivity extends AppCompatActivity {
         }
         else {
             // Permission is already granted, start recording
-            startRecording();
         }
 
         intiView();
