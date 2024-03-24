@@ -3,6 +3,8 @@ package com.example.smartdoorbell;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
@@ -10,11 +12,13 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.VideoView;
 
@@ -42,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
     private Button btnProfile, btnToMonitor;
     private TextView txtDoorStatus, txtStatus;
     private VideoView videoView;
+    private ImageView cameraPhoto;
 
     private MediaRecorder mediaRecorder;
     public static String fileName = "recorded.3gp";
@@ -352,8 +357,10 @@ public class MainActivity extends AppCompatActivity {
                     System.out.println("Some one is at the door!");
                     new Thread(() -> {
                         try {
+                            int t_sleep = 15000;
+                            getCameraPhoto(t_sleep);
                             runOnUiThread(() -> txtStatus.setText(message));
-                            Thread.sleep(5000);
+                            Thread.sleep(t_sleep);
                             runOnUiThread(() -> txtStatus.setText(""));
                         } catch (InterruptedException e) {
                             throw new RuntimeException(e);
@@ -460,6 +467,51 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public void getCameraPhoto(int t_sleep){
+        Request request = new Request.Builder().url(url).build();
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            //Called when the request could not be executed due to cancellation, a connectivity problem or timeout.
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                e.printStackTrace();
+                System.out.println(url);
+            }
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                //Check whether or not the response was successful, indicating that the request was
+                //successfully received, understood, and accepted.
+                if (response.isSuccessful()){
+                    final Bitmap bitmap = BitmapFactory.decodeStream(response.body().byteStream());
+                    //Remember to set the bitmap in the main thread.
+                    //Schedule a task to be executed on the main UI thread using Handler
+                    //Looper.getMainLooper() is responsible for running tasks on the main thread
+                    //Method runnable has run()
+                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+                        @Override
+                        public void run() {
+                            cameraPhoto.setImageBitmap(bitmap);
+                            //Sets the Bitmap (bitmap) to be displayed in the ImageView (cameraPhoto) using cameraPhoto.setImageBitmap(bitmap).
+                        }
+                    });
+                }else {
+                    //Handle the error
+                }
+            }
+        });
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(t_sleep);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                runOnUiThread(() -> cameraPhoto.setImageResource(R.drawable.ic_doorway_spot));
+            }
+        }).start();
+    }
+
     public static String getIp(){
         return ip;
     }
@@ -473,6 +525,7 @@ public class MainActivity extends AppCompatActivity {
         imgBtnSpeak = findViewById(R.id.imgBtnSpeak);
         imgBtnCamera = findViewById(R.id.imgBtnTakePhoto);
         videoView = findViewById(R.id.videoView);
+        cameraPhoto = findViewById(R.id.cameraPhoto);
         doorClosed = true;
         speakable = false;
         client = new OkHttpClient();
