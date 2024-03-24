@@ -19,6 +19,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.MediaController;
 import android.widget.TextView;
 import android.widget.VideoView;
 
@@ -204,12 +205,22 @@ public class MainActivity extends AppCompatActivity {
                                 public void run() {
                                     // Set the video stream to the VideoView
                                     videoView.setVideoURI(Uri.parse(url));
-                                    // Start playing the video
-                                    videoView.start();
-                                    // Make VideoView visible
-                                    videoView.setVisibility(View.VISIBLE);
 
-                                    // Set up completion listener to freeze last frame
+                                    // Set up a MediaController
+                                    MediaController mediaController = new MediaController(MainActivity.this);
+                                    mediaController.setAnchorView(videoView);
+                                    videoView.setMediaController(mediaController);
+
+                                    // Set up a listener to adjust layout parameters when prepared
+                                    videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                                        @Override
+                                        public void onPrepared(MediaPlayer mediaPlayer) {
+                                            // Start playing the video
+                                            videoView.start();
+                                        }
+                                    });
+
+                                    // Set up a listener to freeze last frame when playback completes
                                     videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                                         @Override
                                         public void onCompletion(MediaPlayer mp) {
@@ -219,6 +230,9 @@ public class MainActivity extends AppCompatActivity {
                                             videoView.seekTo(videoView.getDuration());
                                         }
                                     });
+
+                                    // Make VideoView visible
+                                    videoView.setVisibility(View.VISIBLE);
                                 }
                             });
                         } else {
@@ -344,7 +358,8 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == RECORD_AUDIO_PERMISSION_REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Permission has been granted by the user, recording can be started
-                startRecording();
+                Log.d("MainActivity", "RECORD_AUDIO permission granted");
+                //startRecording() IF IT IS BROKEN NOW ADD THIS BACK!!!!!!!
             } else {
                 //Nothing can happen if this is blocked, the functionality will simply not work
                 Log.e("MainActivity", "RECORD_AUDIO permission denied");
