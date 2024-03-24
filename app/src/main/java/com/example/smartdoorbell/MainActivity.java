@@ -338,12 +338,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        btnToMonitor.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this, MonitorActivity.class));
-            }
-        });
+//        btnToMonitor.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                startActivity(new Intent(MainActivity.this, MonitorActivity.class));
+//            }
+//        });
 
         socket.on("message", args -> {
             String message = (String) args[0];
@@ -466,7 +466,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void intiView() {
         btnProfile = findViewById(R.id.btnProfile);
-        btnToMonitor = findViewById(R.id.btnToMonitor);
+//        btnToMonitor = findViewById(R.id.btnToMonitor);
         txtDoorStatus = findViewById(R.id.txtDoorStatus);
         txtStatus = findViewById(R.id.txtStatus);
         imgBtnLock = findViewById(R.id.imgBtnLock);
