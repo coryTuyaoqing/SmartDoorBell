@@ -3,8 +3,6 @@ package com.example.smartdoorbell;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
@@ -12,14 +10,11 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.Looper;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.MediaController;
 import android.widget.TextView;
 import android.widget.VideoView;
 
@@ -44,7 +39,7 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 public class MainActivity extends AppCompatActivity {
 
-    private Button btnProfile;
+    private Button btnProfile, btnToMonitor;
     private TextView txtDoorStatus, txtStatus;
     private VideoView videoView;
 
@@ -55,12 +50,12 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton imgBtnLock, imgBtnSpeak, imgBtnCamera;
     private boolean doorClosed, speakable;
     private OkHttpClient client;
-    final private String ip = "http://192.168.0.107";
+    private static final String ip = "http://192.168.0.110";
     final private String url = ip + "/photo";
-    private final String url_audio = ip + "/upload_audio";
-    private final String url_audio2 = ip + "/download_audio";
+    private final String url_upload_audio = ip + "/upload_audio";
+    private final String url_download_audio = ip + "/download_audio";
+    private final String url_download_video = ip + "/download_video";
     private final String url_unlock = ip + "/unlock";
-    private final String url_door_status = ip + "/doorstatus";
     private static final int RECORD_AUDIO_PERMISSION_REQUEST_CODE = 100;
     private Handler timerHandler = new Handler();
     private Runnable timerRunnable;
@@ -88,9 +83,13 @@ public class MainActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, RECORD_AUDIO_PERMISSION_REQUEST_CODE);
 
         }
-        else {
-            // Permission is already granted, start recording
+
+
+        UserInfo userInfo = new UserInfo(getApplicationContext());
+        if(!userInfo.fileExist()){
+            startActivity(new Intent(MainActivity.this, RegistrationActivity.class));
         }
+
 
         intiView();
         btnProfile.setOnClickListener(new View.OnClickListener() {
@@ -101,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
                 //User info has to be stored so that you do not need to give audio recording permissions each time
                 //Also stores login details (initializes application context)
                 UserInfo userInfo = new UserInfo(getApplicationContext());
-                if(userInfo.initInfo()){
+                if(!userInfo.fileExist()){
                     //Indicates that the user info has been initialised
                     intent  = new Intent(MainActivity.this, RegistrationActivity.class);
                     startActivity(intent);
@@ -187,12 +186,13 @@ public class MainActivity extends AppCompatActivity {
         imgBtnCamera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Request cameraRequest = new Request.Builder().url(url).build();
+                // display video
+                Request cameraRequest = new Request.Builder().url(url_download_video).build();
                 client.newCall(cameraRequest).enqueue(new Callback() {
                     @Override
                     public void onFailure(@NonNull Call call, @NonNull IOException e) {
                         e.printStackTrace();
-                        System.out.println(url);
+                        System.out.println(url_download_video);
                     }
 
                     @Override
@@ -200,16 +200,30 @@ public class MainActivity extends AppCompatActivity {
                         // Check whether or not the response was successful, indicating that the request was
                         // successfully received, understood, and accepted.
                         if (response.isSuccessful()) {
+                            final InputStream inputStream = response.body().byteStream();
+                            File tempVideoFile = File.createTempFile("temp_video", ".mp4", getCacheDir());
+                            FileOutputStream outputStream = new FileOutputStream(tempVideoFile);
+
+                            byte[] buffer = new byte[1024];
+                            int bytesRead;
+                            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                                outputStream.write(buffer, 0, bytesRead);
+                            }
+
+                            // Close streams
+                            inputStream.close();
+                            outputStream.close();
+
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
                                     // Set the video stream to the VideoView
-                                    videoView.setVideoURI(Uri.parse(url));
+                                    videoView.setVideoPath(tempVideoFile.getAbsolutePath());
 
                                     // Set up a MediaController
-                                    MediaController mediaController = new MediaController(MainActivity.this);
-                                    mediaController.setAnchorView(videoView);
-                                    videoView.setMediaController(mediaController);
+//                                    MediaController mediaController = new MediaController(MainActivity.this);
+//                                    mediaController.setAnchorView(videoView);
+//                                    videoView.setMediaController(mediaController);
 
                                     // Set up a listener to adjust layout parameters when prepared
                                     videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
@@ -228,6 +242,16 @@ public class MainActivity extends AppCompatActivity {
                                             videoView.pause();
                                             // Seek to the end of the video to display the last frame
                                             videoView.seekTo(videoView.getDuration());
+                                            videoView.setVisibility(View.INVISIBLE);
+                                        }
+                                    });
+
+                                    videoView.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+                                        @Override
+                                        public boolean onError(MediaPlayer mediaPlayer, int what, int extra) {
+                                            // Handle error
+                                            Log.e("Video Playback", "Error: " + what + ", " + extra);
+                                            return false; // Return true if the error is handled
                                         }
                                     });
 
@@ -241,13 +265,13 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 
-
-                Request audioRequest = new Request.Builder().url(url_audio2).build();
+                //display audio
+                Request audioRequest = new Request.Builder().url(url_download_audio).build();
                 client.newCall(audioRequest).enqueue(new Callback() {
                     @Override
                     public void onFailure(@NonNull Call call, @NonNull IOException e) {
                         e.printStackTrace();
-                        System.out.println(url_audio2);
+                        System.out.println(url_download_audio);
                     }
 
                     @Override
@@ -311,6 +335,13 @@ public class MainActivity extends AppCompatActivity {
                         });
                     }
                 }).start();
+            }
+        });
+
+        btnToMonitor.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, MonitorActivity.class));
             }
         });
 
@@ -403,7 +434,7 @@ public class MainActivity extends AppCompatActivity {
                 .build();
 
         Request request = new Request.Builder()
-                .url(url_audio)
+                .url(url_upload_audio)
                 .post(requestBody)
                 .build();
 
@@ -429,8 +460,13 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public static String getIp(){
+        return ip;
+    }
+
     private void intiView() {
         btnProfile = findViewById(R.id.btnProfile);
+        btnToMonitor = findViewById(R.id.btnToMonitor);
         txtDoorStatus = findViewById(R.id.txtDoorStatus);
         txtStatus = findViewById(R.id.txtStatus);
         imgBtnLock = findViewById(R.id.imgBtnLock);
@@ -440,6 +476,6 @@ public class MainActivity extends AppCompatActivity {
         doorClosed = true;
         speakable = false;
         client = new OkHttpClient();
-        socket = SocketManager.getInstance();
+        socket = SocketManager.getInstance(ip);
     }
 }

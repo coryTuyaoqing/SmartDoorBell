@@ -79,6 +79,7 @@ public class LoginActivity extends AppCompatActivity {
                                     System.out.println(password);
 
                                     UserInfo userInfo = new UserInfo(getApplicationContext());
+                                    userInfo.initInfo();
                                     userInfo.writeInfo(dbFirstName,dbLastName,dbEmail);
 
                                     Intent intent = new Intent(LoginActivity.this, MainActivity.class);

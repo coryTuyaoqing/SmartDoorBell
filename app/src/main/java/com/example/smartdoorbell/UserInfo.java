@@ -24,6 +24,10 @@ public class UserInfo {
         this.file = new File(context.getFilesDir(), "ID");
     }
 
+    public boolean fileExist(){
+        return file.exists();
+    }
+
 
     public boolean initInfo(){
         if(!file.exists()){
