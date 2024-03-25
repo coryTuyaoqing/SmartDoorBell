@@ -64,8 +64,6 @@ public class MainActivity extends AppCompatActivity {
     private final String url_download_video = ip + "/download_video";
     private final String url_unlock = ip + "/unlock";
     private static final int RECORD_AUDIO_PERMISSION_REQUEST_CODE = 100;
-    private Handler timerHandler = new Handler();
-    private Runnable timerRunnable;
     private Socket socket;
 
 
@@ -216,7 +214,6 @@ public class MainActivity extends AppCompatActivity {
                             while ((bytesRead = inputStream.read(buffer)) != -1) {
                                 outputStream.write(buffer, 0, bytesRead);
                             }
-
                             // Close streams
                             inputStream.close();
                             outputStream.close();
@@ -226,7 +223,6 @@ public class MainActivity extends AppCompatActivity {
                                 public void run() {
                                     // Set the video stream to the VideoView
                                     videoView.setVideoPath(tempVideoFile.getAbsolutePath());
-
                                     // Set up a MediaController
 //                                    MediaController mediaController = new MediaController(MainActivity.this);
 //                                    mediaController.setAnchorView(videoView);
@@ -238,7 +234,6 @@ public class MainActivity extends AppCompatActivity {
                                         public void onPrepared(MediaPlayer mediaPlayer) {
                                             PlaybackParams params = new PlaybackParams();
                                             params.setSpeed(0.2f); // Set the speed to 0.5x (half speed)
-
                                             // Apply the playback parameters to the media player
                                             mediaPlayer.setPlaybackParams(params);
                                             // Start playing the video
@@ -252,7 +247,6 @@ public class MainActivity extends AppCompatActivity {
                                         public void onCompletion(MediaPlayer mp) {
                                             // Pause the video playback
                                             videoView.pause();
-                                            // Seek to the end of the video to display the last frame
                                             videoView.seekTo(videoView.getDuration());
                                             videoView.setVisibility(View.INVISIBLE);
                                         }
@@ -350,13 +344,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-//        btnToMonitor.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                startActivity(new Intent(MainActivity.this, MonitorActivity.class));
-//            }
-//        });
-
         socket.on("message", args -> {
             String message = (String) args[0];
             switch (message) {
@@ -403,11 +390,10 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == RECORD_AUDIO_PERMISSION_REQUEST_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Permission has been granted by the user, recording can be started
-                Log.d("MainActivity", "RECORD_AUDIO permission granted");
-                //startRecording() IF IT IS BROKEN NOW ADD THIS BACK!!!!!!!
+                Log.d("MainActivity", "Audio permission granted");
             } else {
                 //Nothing can happen if this is blocked, the functionality will simply not work
-                Log.e("MainActivity", "RECORD_AUDIO permission denied");
+                Log.e("MainActivity", "Audio permission denied");
             }
         }
     }
@@ -439,26 +425,21 @@ public class MainActivity extends AppCompatActivity {
             Log.e("MainActivity", "Audio file not found");
             return;
         }
-
-        // Create a multipart request body
         RequestBody requestBody = new MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
                 .addFormDataPart("file", audioFile.getName(),
                         RequestBody.create(audioFile, MediaType.parse("audio/3gpp")))
                 .build();
-
         Request request = new Request.Builder()
                 .url(url_upload_audio)
                 .post(requestBody)
                 .build();
-
         client.newCall(request).enqueue(new okhttp3.Callback() {
             @Override
             public void onFailure(okhttp3.Call call, IOException e) {
                 e.printStackTrace();
                 Log.e("MainActivity", "Failed to upload audio", e);
             }
-
             @Override
             public void onResponse(okhttp3.Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
@@ -470,8 +451,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-
-
     }
 
     public void getCameraPhoto(int t_sleep){

@@ -47,7 +47,8 @@ public class RegistrationActivity extends AppCompatActivity {
                 String errorMsg = "Passwords do not match";
                 String errorMsg2 = "Please fill in all fields";
 
-                if (!fName.isEmpty() && !lName.isEmpty() && !email.isEmpty() && !password.isEmpty() && !passwordagain.isEmpty() && passwordagain.equals(password)) {
+                if (!fName.isEmpty() && !lName.isEmpty() && !email.isEmpty() && !password.isEmpty() && !passwordagain.isEmpty() &&
+                        passwordagain.equals(password)) {
                     RequestBody requestBody = new FormBody.Builder()
                             .add("fn", fName)
                             .add("ln", lName)
