@@ -6,10 +6,10 @@ import android.widget.ImageView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import io.socket.client.Socket;
+import okhttp3.OkHttpClient;
 
 public class MonitorActivity extends AppCompatActivity {
-    private Socket socket;
+    private OkHttpClient okHttpClient;
     private ImageView imageView;
     private Button btnMonitorBackHome;
 
@@ -20,28 +20,48 @@ public class MonitorActivity extends AppCompatActivity {
 
 //        imageView = findViewById(R.id.imgMonitor);
 //        btnMonitorBackHome = findViewById(R.id.btnMonitorBakcHome);
-//        socket = SocketManager.getInstance(MainActivity.getIp());
+//        okHttpClient = new OkHttpClient();
 //
-//        socket.emit("monitor_request", "android clinet request for door bell monitor");
+//        //Build the request with the URL and request body
+//        Request request = new Request.Builder()
+//                .url("http://192.168.0.110/monitor")
+//                //.post(requestBody)
+//                .get()
+//                .build();
 //
-//        socket.on("video_chunk", new Emitter.Listener() {
+//        //Initiate asynchronous HTTP request with okhttp
+//        //enqueue method performs the request asynchronously + expects callback to handle the response.
+//        okHttpClient.newCall(request).enqueue(new Callback() {
 //            @Override
-//            public void call(final Object... args) {
-//                // Process received video frame
-//                byte[] data = (byte[]) args[0];
-//                final Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
-//
-//                // Update UI on the main thread
-//                runOnUiThread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        imageView.setImageBitmap(bitmap);
-//                    }
-//                });
+//            //@NonNull indicates that the field cannot contain null value
+//            //the compiler or analysis tool may generate a warning or error if the value is null
+//            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+//                e.printStackTrace();
+//                Log.e("MonitorActicity", "Failed to send boolean value to server: " + e.getMessage());
 //            }
-//        });
 //
-//        socket.connect();
+//            @Override
+//            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+//                if (response.isSuccessful()) {
+//                    // Process received video frame
+//                    final Bitmap bitmap = BitmapFactory.decodeStream(response.body().byteStream());
+//                    //Remember to set the bitmap in the main thread.
+//                    //Schedule a task to be executed on the main UI thread using Handler
+//                    //Looper.getMainLooper() is responsible for running tasks on the main thread
+//                    //Method runnable has run()
+//                    new Handler(Looper.getMainLooper()).post(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            imageView.setImageBitmap(bitmap);
+//                            //Sets the Bitmap (bitmap) to be displayed in the ImageView (cameraPhoto) using cameraPhoto.setImageBitmap(bitmap).
+//                        }
+//                    });
+//                }else {
+//                    //Handle the error
+//                }
+//            }
+//
+//        });
 //
 //        btnMonitorBackHome.setOnClickListener(new View.OnClickListener() {
 //            @Override
@@ -50,10 +70,9 @@ public class MonitorActivity extends AppCompatActivity {
 //            }
 //        });
     }
-//
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
-//        socket.disconnect();
     }
 }

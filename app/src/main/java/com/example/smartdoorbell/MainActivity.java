@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
+import android.media.PlaybackParams;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -30,6 +31,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.TimeUnit;
 
 import io.socket.client.Socket;
 import okhttp3.Call;
@@ -206,7 +208,7 @@ public class MainActivity extends AppCompatActivity {
                         // successfully received, understood, and accepted.
                         if (response.isSuccessful()) {
                             final InputStream inputStream = response.body().byteStream();
-                            File tempVideoFile = File.createTempFile("temp_video", ".mp4", getCacheDir());
+                            File tempVideoFile = File.createTempFile("temp_video", ".avi", getCacheDir());
                             FileOutputStream outputStream = new FileOutputStream(tempVideoFile);
 
                             byte[] buffer = new byte[1024];
@@ -234,6 +236,11 @@ public class MainActivity extends AppCompatActivity {
                                     videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                                         @Override
                                         public void onPrepared(MediaPlayer mediaPlayer) {
+                                            PlaybackParams params = new PlaybackParams();
+                                            params.setSpeed(0.2f); // Set the speed to 0.5x (half speed)
+
+                                            // Apply the playback parameters to the media player
+                                            mediaPlayer.setPlaybackParams(params);
                                             // Start playing the video
                                             videoView.start();
                                         }
@@ -528,7 +535,11 @@ public class MainActivity extends AppCompatActivity {
         cameraPhoto = findViewById(R.id.cameraPhoto);
         doorClosed = true;
         speakable = false;
-        client = new OkHttpClient();
+        client = new OkHttpClient.Builder()
+                .connectTimeout(30, TimeUnit.SECONDS) // Set connection timeout to 30 seconds
+                .readTimeout(30, TimeUnit.SECONDS) // Set read timeout to 30 seconds
+                .writeTimeout(30, TimeUnit.SECONDS) // Set write timeout to 30 seconds
+                .build();;
         socket = SocketManager.getInstance(ip);
     }
 }

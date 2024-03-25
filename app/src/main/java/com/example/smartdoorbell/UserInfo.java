@@ -92,17 +92,4 @@ public class UserInfo {
         return file.delete();
     }
 
-    public String readFirstName(){
-        return readFile()[1];
-    }
-
-
-    public String readLastName(){
-        return readFile()[2];
-    }
-
-    public String readEmail(){
-        return readFile()[3];
-    }
-
 }
